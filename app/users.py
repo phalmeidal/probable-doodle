@@ -13,7 +13,7 @@ user_model = api.model('User', {
 mydb = mysql.connector.connect(
     host='localhost',
     user='root',
-    passwd='probable123',
+    passwd='12345678',
     database='probable'
 )
 
@@ -28,15 +28,21 @@ class UserList(Resource):
         users = cursor.fetchall()
         return users, 200
 
+@api.route('/create')  # Define a rota para criar um novo usuário
+class CreateUser(Resource):
     @api.doc('create_user')
-    @api.expect(user_model)
+    @api.expect(user_model)  # Espera um modelo de dados conforme definido em 'user_model'
     def post(self):
         """Create a new user"""
-        data = request.json
-        create_user = f"INSERT INTO users (userName, userEmail, userPasswd) VALUES ('{data['userName']}', '{data['userEmail']}', '{data['userPasswd']}')"
-        cursor.execute(create_user)
-        mydb.commit()
-        return {'message': 'User created successfully'}, 201
+        data = request.get_json()
+        try:
+            cursor.execute("INSERT INTO users (userName, userEmail, userPasswd) VALUES (%s, %s, %s)", 
+                           (data['userName'], data['userEmail'], data['userPasswd']))
+            mydb.commit()
+            return {'message': 'User created successfully'}, 201
+        except Exception as e:
+            mydb.rollback()
+            return {'message': 'Failed to create user', 'error': str(e)}, 500
 
 @api.route('/<string:userName>')
 @api.param('userName', 'The user identifier')
@@ -67,3 +73,16 @@ class User(Resource):
         cursor.execute(update_user)
         mydb.commit()
         return {'message': 'User updated successfully'}, 200
+
+@api.route('/<string:userEmail>')
+@api.param('userEmail', 'The user email')
+class UserByEmail(Resource):
+    @api.doc('get_user_by_email')
+    def get(self, userEmail):
+        """Fetch a user given its email"""
+        cursor.execute("SELECT * FROM users WHERE userEmail = %s", (userEmail,))
+        user = cursor.fetchone()
+        if user:
+            return user, 200
+        else:
+            return {'message': 'User not found'}, 404
