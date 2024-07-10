@@ -24,7 +24,7 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
-        from routes.users import api as users_api
+        from controller.user_controller import api as users_api
         api.add_namespace(users_api, path='/users')
 
     @app.after_request
