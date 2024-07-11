@@ -5,6 +5,7 @@ python-dotenv
 bcrypt
 sqlalchemy
 Flask-JWT-Extended
+psycopg2-binary
 mysql-connector-python
 flask_sqlalchemy
 mysqlclient

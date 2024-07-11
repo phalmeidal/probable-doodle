@@ -9,17 +9,17 @@ class UserService:
         return User.query.all()
 
     @staticmethod
-    def get_user_by_name(userName):
-        return User.query.filter_by(userName=userName).first()
+    def get_user_by_name(user_name):
+        return User.query.filter_by(user_name=user_name).first()
 
     @staticmethod
-    def get_user_by_email(userEmail):
-        return User.query.filter_by(userEmail=userEmail).first()
+    def get_user_by_email(user_email):
+        return User.query.filter_by(user_email=user_email).first()
 
     @staticmethod
     def create_user(data):
-        hashed_passwd = bcrypt.hashpw(data['userPasswd'].encode('utf-8'), bcrypt.gensalt(10)).decode('utf-8')
-        new_user = User(userName=data['userName'], userEmail=data['userEmail'], userPasswd=hashed_passwd)
+        hashed_passwd = bcrypt.hashpw(data['user_passwd'].encode('utf-8'), bcrypt.gensalt(10)).decode('utf-8')
+        new_user = User(user_name=data['user_name'], user_email=data['user_email'], user_passwd=hashed_passwd)
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -30,9 +30,9 @@ class UserService:
 
     @staticmethod
     def update_user(user, data):
-        user.userName = data['userName']
-        user.userEmail = data['userEmail']
-        user.userPasswd = bcrypt.hashpw(data['userPasswd'].encode('utf-8'), bcrypt.gensalt(10))
+        user.userName = data['user_name']
+        user.userEmail = data['user_email']
+        user.userPasswd = bcrypt.hashpw(data['user_passwd'].encode('utf-8'), bcrypt.gensalt(10))
         db.session.commit()
         return {'message': 'User updated successfully'}, 200
 
@@ -43,8 +43,8 @@ class UserService:
         return {'message': 'User deleted successfully'}, 200
 
     @staticmethod
-    def check_login(userEmail, userPasswd):
-        user = User.query.filter_by(userEmail=userEmail).first()
-        if user and bcrypt.checkpw(userPasswd.encode('utf-8'), user.userPasswd.encode('utf-8')):
+    def check_login(user_email, user_passwd):
+        user = User.query.filter_by(user_email=user_email).first()
+        if user and bcrypt.checkpw(user_passwd.encode('utf-8'), user.user_passwd.encode('utf-8')):
             return user
         return None
